@@ -212,8 +212,6 @@ axiomatization where euc: "euclidean"
   theorem T3: "\<lfloor>\<^bold>\<box> (\<^bold>\<exists>\<^sup>Ex. G1 x)\<rfloor>"
     by (meson nonempty euc C1 C2 G1_def)
 
-  (* sledgehammer [remote_satallax remote_leo2] *)
-
 
 subsection {* Consistency again *}
 

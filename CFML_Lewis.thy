@@ -42,7 +42,7 @@ section \<open>* QCML Attempt 1 *\<close>
     
 (* Defining Semantics of counterfactuals*)
 abbreviation LewisVC 
-  where "LewisVC \<equiv> \<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> (\<forall>x. \<forall>y. (\<phi> x \<or> r(w)(y)(y) \<longleftrightarrow> \<not>(r(w)(x)(y) \<or> r(w)(y)(x)))) \<or> KMin(\<phi>)(\<psi>)(w)"        
+  where "LewisVC \<equiv> \<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> ((\<forall>x. ( (\<phi> x \<and> r(w)(x)(x)) \<longleftrightarrow> \<not>(r(w)(x)(x))  )) \<or> KMin(\<phi>)(\<psi>)(w))"        
 (* abbreviation Stalnacker :: "bool"
   where "Stalnacker \<equiv>  S_Minset \<and> (\<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> (\<forall>x. \<forall>y. (\<phi> x \<or> r(w)(y)(y) \<longleftrightarrow> \<not>(r(w)(x)(y) \<or> r(w)(y)(x)))) \<or> KMin(w)(\<phi>)(\<psi>))" *)   
 
@@ -53,6 +53,8 @@ abbreviation follows_w :: "i \<Rightarrow> \<sigma> \<Rightarrow> bool" (infix"\
   where "(w  \<^bold>\<Turnstile> p)  \<equiv> p w  "
 abbreviation follows_glob :: "bool \<Rightarrow> \<sigma> \<Rightarrow> bool" (infix"\<^bold>\<turnstile>"40)
   where "(L \<^bold>\<turnstile> p )  \<equiv> (L \<longrightarrow> \<lfloor>p\<rfloor>)"
+
+(*Conversion into Normal Modal Logic*)
 abbreviation bottom :: "\<sigma>" ("\<bottom>") 
   where "\<bottom> (w) \<equiv> w \<^bold>\<Turnstile>( \<^bold>\<exists>x. (\<^bold>\<not>(x \<^bold>=\<^sup>L x)))"
 abbreviation mbox :: "\<sigma> \<Rightarrow> \<sigma>" ("\<^bold>\<box>") where "\<^bold>\<box> \<phi> \<equiv> ( (\<^bold>\<not>\<phi>)\<box>\<rightarrow> \<bottom>)"
@@ -84,11 +86,33 @@ axiomatization  where
       Preorder: "Preorder" and
       totale: "\<forall>w. Total(w)" and
       LVC: "LewisVC"
-      
-lemma WeakCentering: " \<forall>w. w \<in> Lew_Minset w (\<^bold>\<not> \<bottom>)"
-  nitpick[user_axioms, timeout = 400] oops
 
-axiomatization where
-    WeakCenter: "\<forall>w. w \<in> Lew_Minset w (\<^bold>\<not> \<bottom>)"
+
+(*Lewis's System VC*)
+
+lemma K0: "\<lfloor>\<^bold>\<box>(\<phi>  \<^bold>\<rightarrow> \<psi>)  \<^bold>\<rightarrow> ( (\<^bold>\<box>\<phi>)  \<^bold>\<rightarrow> (\<^bold>\<box> \<psi>) ) \<rfloor>"
+  using LVC by metis
+
+lemma L1: "\<lfloor>\<phi> \<box>\<rightarrow> \<phi>\<rfloor>"
+  using LVC Preorder by metis
+
+lemma L2: "\<lfloor>((\<^bold>\<not>\<phi>) \<box>\<rightarrow> \<phi>)  \<^bold>\<rightarrow> (\<psi> \<box>\<rightarrow> \<phi>) \<rfloor>"
+  using LVC Preorder by metis
+
+(* lemma L3: "\<lfloor>(\<phi> \<box>\<rightarrow> (\<^bold>\<not>\<psi>))  \<^bold>\<or> (((\<psi> \<^bold>\<and> \<phi>) \<box>\<rightarrow> \<zeta>)  \<^bold>\<leftrightarrow> (\<phi> \<box>\<rightarrow>  (\<psi> \<^bold>\<rightarrow> \<zeta>) )) \<rfloor>"
+  using LVC Preorder totale by blast *)
+
+(* lemma L4: "\<lfloor>((\<phi>) \<box>\<rightarrow> \<psi>)  \<^bold>\<rightarrow> (\<phi>  \<^bold>\<rightarrow> \<psi>) \<rfloor>"
+  using LVC  by blast *)
+
+lemma L5: "\<lfloor>((\<psi> \<^bold>\<and> \<phi>)  \<^bold>\<rightarrow> (\<phi> \<box>\<rightarrow>  \<psi>)) \<rfloor> "
+  using LVC Preorder totale by blast
+
+
+
+(*Consistency check *)
+
+lemma True
+  nitpick[satisfy, user_axioms, expect = genuine] oops
 
 end

@@ -2,7 +2,7 @@ theory CFML_Lewis
 imports Main
 
 begin
-section \<open>* QCML Attempt 1 *\<close>
+section \<open>* QCML- logic of counterfactuals *\<close>
 
   typedecl i    (* "the type for possible worlds" *)
   typedecl j    (* "the type for elements of a set" *)
@@ -26,7 +26,7 @@ section \<open>* QCML Attempt 1 *\<close>
   abbreviation mexistsB  :: "('a\<Rightarrow>\<sigma>)\<Rightarrow>\<sigma>" (binder"\<^bold>\<exists>"[8]9) where "\<^bold>\<exists>x. \<phi>(x) \<equiv> \<^bold>\<exists>\<phi>" 
   abbreviation mLeibeq :: "\<mu> \<Rightarrow> \<mu> \<Rightarrow> \<sigma>" (infixr "\<^bold>=\<^sup>L" 52) where "x \<^bold>=\<^sup>L y \<equiv> \<^bold>\<forall>(\<lambda>\<phi>. (\<phi> x \<^bold>\<rightarrow> \<phi> y))"
   
-  abbreviation KMin :: "\<sigma> \<Rightarrow> \<sigma> \<Rightarrow> \<sigma>" where "KMin(\<phi>)(\<psi>) \<equiv>  \<lambda>w. (\<exists>v. \<forall>u. ((\<phi> v \<and> r(w)(v)(v)) \<and>  (r(w)(u)(v) \<longrightarrow> ((\<phi> \<^bold>\<rightarrow> \<psi>) u))))"
+  abbreviation KMin :: "\<sigma> \<Rightarrow> \<sigma> \<Rightarrow> \<sigma>" where "KMin(\<phi>)(\<psi>) \<equiv>  \<lambda>w. (\<exists>v.  (((\<phi> v \<and> (r w v v)) \<and> (\<forall>u. ((r w u v) \<longrightarrow> ((\<phi> \<^bold>\<rightarrow> \<psi>) u))))    ))"
   abbreviation S_Minset :: "bool" where "S_Minset  \<equiv> (\<forall>w. \<forall>x. \<forall>\<Phi>. (IsIn_MinSet(w)(x)(\<Phi>) \<longleftrightarrow> (\<Phi> x) \<and> \<not>(\<exists>u.(r(w)(u)(x) \<and> u\<noteq>x))))" 
 
   (* abbreviation mcbox :: "\<sigma> \<Rightarrow> \<sigma> \<Rightarrow> \<sigma>" (infixr "\<box>\<rightarrow>" 70) where "\<phi> \<box>\<rightarrow> \<psi> \<equiv> \<lambda>w. (\<forall>x. \<forall>y. (\<phi> x \<or> r(w)(y)(y) \<longleftrightarrow> \<not>(r(w)(x)(y) \<or> r(w)(y)(x)))) \<or> KMin(w)(\<phi>)(\<psi>)" *)
@@ -42,8 +42,8 @@ section \<open>* QCML Attempt 1 *\<close>
     
 (* Defining Semantics of counterfactuals*)
 abbreviation LewisVC 
-  where "LewisVC \<equiv> \<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> (\<forall>x. \<forall>y. (\<phi> x \<or> r(w)(y)(y) \<longleftrightarrow> \<not>(r(w)(x)(y) \<or> r(w)(y)(x)))) \<or> KMin(\<phi>)(\<psi>)(w)"        
-(* abbreviation Stalnacker :: "bool"
+  where "LewisVC \<equiv> \<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> ((\<forall>x. ( (\<phi> x \<and> r(w)(x)(x)) \<longleftrightarrow> \<not>(r(w)(x)(x))  )) \<or> KMin(\<phi>)(\<psi>)(w))"        
+(* abbreviation Stalnacker 
   where "Stalnacker \<equiv>  S_Minset \<and> (\<forall>\<phi> \<psi>. \<forall>w. (\<phi> \<box>\<rightarrow> \<psi>)(w) \<longleftrightarrow> (\<forall>x. \<forall>y. (\<phi> x \<or> r(w)(y)(y) \<longleftrightarrow> \<not>(r(w)(x)(y) \<or> r(w)(y)(x)))) \<or> KMin(w)(\<phi>)(\<psi>))" *)   
 
 (*Some metalogical Operators for Kripke frames*)    
@@ -53,8 +53,10 @@ abbreviation follows_w :: "i \<Rightarrow> \<sigma> \<Rightarrow> bool" (infix"\
   where "(w  \<^bold>\<Turnstile> p)  \<equiv> p w  "
 abbreviation follows_glob :: "bool \<Rightarrow> \<sigma> \<Rightarrow> bool" (infix"\<^bold>\<turnstile>"40)
   where "(L \<^bold>\<turnstile> p )  \<equiv> (L \<longrightarrow> \<lfloor>p\<rfloor>)"
+
+(*Conversion into Normal Modal Logic*)
 abbreviation bottom :: "\<sigma>" ("\<bottom>") 
-  where "\<bottom> (w) \<equiv> w \<^bold>\<Turnstile>( \<^bold>\<exists>x. (\<^bold>\<not>(x \<^bold>=\<^sup>L x)))"
+  where "\<bottom> (w) \<equiv> w \<^bold>\<Turnstile>(\<^bold>\<exists> \<Phi>. (\<^bold>\<not>\<Phi>  \<^bold>\<and>  \<Phi>))"
 abbreviation mbox :: "\<sigma> \<Rightarrow> \<sigma>" ("\<^bold>\<box>") where "\<^bold>\<box> \<phi> \<equiv> ( (\<^bold>\<not>\<phi>)\<box>\<rightarrow> \<bottom>)"
 
 (*MinSets *)
@@ -79,16 +81,43 @@ abbreviation Preorder :: bool
 abbreviation Total
   where "Total \<equiv> (\<lambda>w. \<forall>x y. (r (w)(x)(y) \<or>  r(w)(y)(x)) )"
 
-(*Syntax results *)
+subsection \<open>* Syntax Correspondence *\<close>
+
 axiomatization  where 
       Preorder: "Preorder" and
       totale: "\<forall>w. Total(w)" and
-      LVC: "LewisVC"
+      LVC: "LewisVC" 
       
-lemma WeakCentering: " \<forall>w. w \<in> Lew_Minset w (\<^bold>\<not> \<bottom>)"
-  nitpick[user_axioms, timeout = 400] oops
+(*Lewis's System VC*)
 
-axiomatization where
-    WeakCenter: "\<forall>w. w \<in> Lew_Minset w (\<^bold>\<not> \<bottom>)"
+lemma K0: "\<lfloor>\<^bold>\<box>(\<phi>  \<^bold>\<rightarrow> \<psi>)  \<^bold>\<rightarrow> ( (\<^bold>\<box>\<phi>)  \<^bold>\<rightarrow> (\<^bold>\<box> \<psi>) ) \<rfloor>"
+  using LVC by metis
+
+lemma K1: "True \<^bold>\<turnstile> p \<longrightarrow> \<lfloor>\<^bold>\<box>p \<rfloor>"
+  using Preorder by blast
+
+lemma L1: "\<lfloor>\<phi> \<box>\<rightarrow> \<phi>\<rfloor>"
+  using LVC Preorder by metis
+
+lemma L2: "\<lfloor>((\<^bold>\<not>\<phi>) \<box>\<rightarrow> \<phi>)  \<^bold>\<rightarrow> (\<psi> \<box>\<rightarrow> \<phi>) \<rfloor>"
+  using LVC Preorder by metis
+
+(*Counterexample failed 58/90 timout 300 *)
+ lemma L3: "\<lfloor>(\<phi> \<box>\<rightarrow> (\<^bold>\<not>\<psi>))  \<^bold>\<or> (((\<psi> \<^bold>\<and> \<phi>) \<box>\<rightarrow> \<zeta>)  \<^bold>\<leftrightarrow> (\<phi> \<box>\<rightarrow>  (\<psi> \<^bold>\<rightarrow> \<zeta>) )) \<rfloor>"
+   nitpick[user_axioms, timeout= 300] oops 
+
+(*
+(*Proof found by spass cvc4 *)
+lemma L4: "\<lfloor>((\<phi>) \<box>\<rightarrow> \<psi>)  \<^bold>\<rightarrow> (\<phi>  \<^bold>\<rightarrow> \<psi>) \<rfloor>"
+  using LVC Cent  by blast 
+
+(*Counterexample failed 42/90 timout 100 *)
+(*Proof found by zipperposition *)
+lemma L5: "\<lfloor>((\<psi> \<^bold>\<and> \<phi>)  \<^bold>\<rightarrow> (\<phi> \<box>\<rightarrow>  \<psi>)) \<rfloor> "
+  using LVC Cent by blast *)
+
+(*Consistency check *)
+lemma True
+  nitpick[satisfy, user_axioms, expect = genuine] oops
 
 end

@@ -62,7 +62,7 @@ theorem Pred: "⌊❙∃Φ.( Φ x ❙↔  (❙∃⇧Ey. (x ❙=⇧L y) ))⌋"
   using nonempty by blast
 
 (*Proof found,/nitpick failed *)    
-theorem Taut: " L ❙⊢ p ⟹ ⌊❙∃Φ.( Φ ❙↔  p )⌋"
+theorem Taut: " True ❙⊢ p ⟹ ⌊❙∃Φ.( Φ ❙↔  p )⌋"
   using nonempty by blast
     
 section ‹* Perfective- satisying A1 A2 *›    

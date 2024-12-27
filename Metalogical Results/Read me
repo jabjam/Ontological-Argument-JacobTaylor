@@ -1,1 +1,3 @@
-readmerea
+This directory contains a hodgepodge of Isabelle files which prove results about syntax and semantics.
+
+We reserve a directory as each result instantiates axioms we would wish to not assume for other files. 
